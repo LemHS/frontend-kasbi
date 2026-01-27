@@ -1,0 +1,598 @@
+/*********LOGIN**********/
+.login-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  height: 100vh;
+}
+
+/* ========== LEFT SECTION ========== */
+.login-left {
+  background: linear-gradient(135deg, #c8102e 0%, #ff4b4b 100%);
+  color: white;
+  padding: 80px;
+  position: relative;
+  overflow: hidden;
+}
+
+.logo-tutwuri {
+  width: 110px;
+  margin-bottom: 30px;
+}
+
+.left-title {
+  font-size: 42px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+}
+
+.left-desc {
+  font-size: 18px;
+  margin-top: 15px;
+  max-width: 420px;
+  line-height: 1.5;
+}
+
+/* Decorative Circles */
+.circle {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.08);
+  filter: blur(2px);
+}
+
+.circle-1 {
+  width: 280px;
+  height: 280px;
+  bottom: -50px;
+  left: -40px;
+}
+
+.circle-2 {
+  width: 200px;
+  height: 200px;
+  top: 80px;
+  right: 60px;
+}
+
+/* ========== RIGHT SECTION ========== */
+.login-right {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 30px;
+}
+
+/* Card Width FIXED */
+.login-card {
+  width: 100%;
+  max-width: 420px;
+  background: white;
+  padding: 40px 30px;
+  border-radius: 22px;
+  box-shadow: 0px 25px 60px rgba(0, 0, 0, 0.12);
+  text-align: center;
+}
+
+.kasbi-logo {
+  width: 90px;
+  margin-bottom: 20px;
+}
+
+.login-title {
+  font-size: 26px;
+  font-weight: 700;
+  color: #c8102e;
+}
+
+.login-subtitle {
+  font-size: 14px;
+  margin-bottom: 25px;
+  color: #555;
+}
+
+/* ========== INPUTS ========== */
+.input-group {
+  margin-bottom: 16px;
+  position: relative;
+}
+
+.login-input {
+  width: 87%;
+  padding: 14px 18px;
+  font-size: 15px;
+  border-radius: 30px;
+  border: 2px solid #e5e5e5;
+  transition: 0.2s ease;
+}
+
+.login-input:focus {
+  outline: none;
+  border-color: #c8102e;
+  background: #fff5f5;
+}
+
+.eye-btn {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: #c8102e;
+  cursor: pointer;
+}
+
+/* ========== BUTTON ========== */
+.login-btn {
+  width: 100%;
+  padding: 14px;
+  background: linear-gradient(90deg, #ff4747, #c8102e);
+  border: none;
+  border-radius: 12px;
+  color: white;
+  font-size: 17px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 10px;
+  margin-bottom: 20px;
+  transition: 0.2s;
+}
+
+.login-btn:hover {
+  opacity: 0.88;
+}
+
+/* ========== FOOTER TEXT ========== */
+.login-footer {
+  font-size: 12px;
+  color: #777;
+}
+
+/* ========== RESPONSIVE MODE ========== */
+@media (max-width: 768px) {
+  .login-container {
+    grid-template-columns: 1fr;
+    height: auto;
+  }
+
+  .login-left {
+    text-align: center;
+    padding: 50px 30px;
+  }
+
+  .left-desc {
+    margin: 0 auto;
+  }
+
+  .circle-1,
+  .circle-2 {
+    display: none;
+  }
+
+  .login-right {
+    padding: 20px;
+  }
+}
+.register-wrapper {
+  margin-top: -8px;
+  margin-bottom: 14px;
+}
+
+.register-text {
+  font-size: 14px;
+  color: #555;
+}
+
+.register-link {
+  color: #c8102e;
+  font-weight: 60;
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: 0.2s ease;
+}
+
+.register-link:hover {
+  border-bottom: 0.1px solid #c8102e;
+  color: #a10016;
+}
+
+/***********Register***************/
+/* =============================
+   CENTER WRAPPER
+============================= */
+.register-wrapperr {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: radial-gradient(circle at top, #fff1f1, #ffe5e7);
+  padding: 20px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Floating background shapes */
+.reg-bg {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(90px);
+  opacity: 0.25;
+}
+
+.reg-bg-1 {
+  width: 380px;
+  height: 380px;
+  background: #ff4f5e;
+  top: -60px;
+  right: -30px;
+}
+
+.reg-bg-2 {
+  width: 300px;
+  height: 300px;
+  background: #ffc2c2;
+  bottom: -40px;
+  left: -40px;
+}
+
+/* =============================
+   CARD
+============================= */
+.register-card {
+  width: 100%;
+  max-width: 430px;
+  background: #ffffff;
+  padding: 40px 32px;
+  border-radius: 26px;
+  box-shadow: 0 20px 60px rgba(220, 0, 0, 0.18);
+  position: relative;
+  z-index: 3;
+  text-align: center;
+}
+
+/* =============================
+   HEADER (LOGOS + TEXT)
+============================= */
+.reg-logo-tutwuri {
+  width: 75px;
+  display: block;
+  margin: 0 auto 8px;
+}
+
+.reg-logo-kasbi {
+  width: 200px;
+  display: block;
+  margin: 0 auto 6px;
+  opacity: 0.9;
+}
+
+.reg-title {
+  font-size: 26px;
+  font-weight: 800;
+  color: #b80017;
+  margin-top: 6px;      /* tambahkan nilai kecil agar judul mendekat */
+  margin-bottom: 6px;   
+}
+
+.reg-subtitle {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 28px;
+  margin-bottom: 20px; 
+}
+
+/* =============================
+   INPUT FIELDS
+============================= */
+.reg-input-group {
+  margin-bottom: 16px;
+  position: relative;
+}
+
+.reg-input {
+  width: 90%;
+  height: 48px;
+  border-radius: 14px;
+  border: 1.8px solid #ddd;
+  padding: 0 16px;
+  font-size: 15px;
+  transition: 0.25s ease;
+}
+
+.reg-input:focus {
+  outline: none;
+  border-color: #c8102e;
+  box-shadow: 0 0 0 3px rgba(200, 16, 46, 0.18);
+}
+
+/* Eye Icon Toggle */
+.password-field .eye-btn {
+  position: absolute;
+  top: 50%;
+  right: 14px;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  padding: 4px;
+  cursor: pointer;
+  color: #c8102e;
+}
+
+/* =============================
+   BUTTON
+============================= */
+.reg-btn {
+  width: 100%;
+  height: 48px;
+  background: linear-gradient(90deg, #ff3d3d, #c8102e);
+  border: none;
+  border-radius: 14px;
+  color: #fff;
+  font-size: 17px;
+  font-weight: 700;
+  margin-top: 10px;
+  cursor: pointer;
+  transition: 0.25s ease;
+}
+
+.reg-btn:hover {
+  opacity: 0.92;
+}
+
+/* =============================
+   LINK SWITCH
+============================= */
+.reg-switch {
+  margin-top: 18px;
+  font-size: 14px;
+  color: #444;
+}
+
+.reg-link {
+  color: #c8102e;
+  font-weight: 600;
+}
+
+.reg-link:hover {
+  text-decoration: underline;
+}
+
+/* =============================
+   FOOTER
+============================= */
+.reg-footer {
+  margin-top: 22px;
+  font-size: 12px;
+  color: #888;
+}
+
+/* =============================
+   RESPONSIVE
+============================= */
+@media (max-width: 480px) {
+  .register-card {
+    padding: 32px 24px;
+    border-radius: 20px;
+  }
+
+  .reg-title {
+    font-size: 22px;
+  }
+}
+
+/*********CHATBOT**********/
+/* LAYOUT */
+.chat-container {
+  display: flex;
+  height: 100vh;
+  background: #f9f9f9;
+}
+
+/* SIDEBAR */
+.chat-sidebar {
+  width: 280px;
+  background: linear-gradient(180deg, #d72638, #8b0000);
+  color: white;
+  padding: 30px 20px;
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar-logo {
+  width: 180px;
+  display: block;
+  margin: 0 auto ;
+}
+
+.sidebar-title {
+  font-size: 18px;
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 18px;
+}
+
+.quick-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.quick-btn {
+  background: rgba(255, 255, 255, 0.15);
+  border: none;
+  padding: 12px;
+  border-radius: 10px;
+  color: #fff;
+  text-align: left;
+  cursor: pointer;
+  transition: 0.25s;
+}
+
+.quick-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* FOOTER */
+.sidebar-footer {
+  margin-top: auto;
+  font-size: 12px;
+  opacity: 0.7;
+  text-align: center;
+}
+
+/* MAIN AREA */
+.chat-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+/* HEADER */
+.chat-header {
+  padding: 20px 25px;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  border-bottom: 1px solid #ddd;
+  background: white;
+}
+
+.header-logo {
+  width: 75px;
+}
+
+.header-title {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 700;
+  color: #b80017;
+}
+
+.header-sub {
+  margin: 0;
+  font-size: 14px;
+  color: #555;
+}
+
+/* CHAT AREA */
+.chat-box {
+  flex: 1;
+  padding: 25px;
+  overflow-y: auto;
+}
+
+.msg-row {
+  display: flex;
+  margin-bottom: 12px;
+}
+
+.msg-row.right {
+  justify-content: flex-end;
+}
+
+.msg-bubble {
+  max-width: 65%;
+  padding: 12px 16px;
+  border-radius: 14px;
+  font-size: 15px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  position: relative;
+}
+
+/* user bubble */
+.msg-bubble.user {
+  background: #d72638;
+  color: white;
+  border-bottom-right-radius: 0;
+}
+
+/* bot bubble */
+.msg-bubble.bot {
+  background: white;
+  color: #333;
+  border-bottom-left-radius: 0;
+}
+
+/* time text */
+.msg-time {
+  font-size: 11px;
+  opacity: 0.6;
+  margin-top: 6px;
+}
+
+/* LOADING DOTS */
+.dots span {
+  width: 7px;
+  height: 7px;
+  margin-right: 4px;
+  background: #d72638;
+  border-radius: 50%;
+  display: inline-block;
+  animation: blink 1.3s infinite;
+}
+
+.dots span:nth-child(2) {
+  animation-delay: .2s;
+}
+
+.dots span:nth-child(3) {
+  animation-delay: .4s;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: .2; }
+  50% { opacity: 1; }
+}
+
+/* INPUT AREA */
+.chat-input {
+  padding: 18px 22px;
+  display: flex;
+  gap: 12px;
+  background: #fff;
+  border-top: 1px solid #ddd;
+}
+
+.chat-input textarea {
+  flex: 1;
+  padding: 14px;
+  border-radius: 10px;
+  border: 1px solid #ccc;
+  resize: none;
+  height: 55px;
+}
+
+.send-btn {
+  background: linear-gradient(90deg, #d72638, #8b0000);
+  color: white;
+  border: none;
+  padding: 0 22px;
+  border-radius: 10px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.25s;
+}
+
+.send-btn:hover {
+  opacity: 0.85;
+}
+
+/* RESPONSIVE */
+@media (max-width: 768px) {
+  .chat-sidebar {
+    display: none;
+  }
+
+  .chat-container {
+    flex-direction: column;
+  }
+
+  .header-logo {
+    width: 40px;
+  }
+
+  .msg-bubble {
+    max-width: 80%;
+  }
+}
+
