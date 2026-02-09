@@ -106,7 +106,7 @@ export default function AdminsPage() {
         if (formData.username) updatePayload.username = formData.username;
         updatePayload.email = formData.email;
 
-        await adminService.updateUser(currentUser.id, updatePayload);
+        await adminService.updateUser(parseInt(currentUser.id), updatePayload);
         alert("Data admin berhasil diperbarui!");
       }
       setIsModalOpen(false);
