@@ -82,8 +82,8 @@ export default function AdminsPage() {
     setModalMode("edit");
     setCurrentUser(user);
     setFormData({ 
-      username: user.user_name, 
-      email: user.user_email, 
+      username: user.username, 
+      email: user.email, 
       password: "", 
       full_name: "", 
       is_active: true 
@@ -108,8 +108,7 @@ export default function AdminsPage() {
         // Prepare update payload
         const updatePayload = {};
         if (formData.password) updatePayload.password = formData.password;
-        if (formData.full_name) updatePayload.full_name = formData.full_name;
-        updatePayload.username = formData.username;
+        if (formData.username) updatePayload.username = formData.username;
         updatePayload.email = formData.email;
 
         // Use service to update user
@@ -127,13 +126,13 @@ export default function AdminsPage() {
   };
 
   const handleDelete = async (user) => {
-    if (!window.confirm(`Yakin ingin menghapus admin "${user.user_name}"?`)) return;
+    if (!window.confirm(`Yakin ingin menghapus admin "${user.username}"?`)) return;
 
     try {
       // Use service to delete user
       await adminService.deleteUser({
-        username: user.user_name,
-        email: user.user_email
+        username: user.username,
+        email: user.email
       });
       alert("Admin berhasil dihapus.");
       fetchUsers();
@@ -146,8 +145,8 @@ export default function AdminsPage() {
   // --- RENDER ---
   
   const filteredUsers = users.filter(user => 
-    user.user_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    user.user_email.toLowerCase().includes(searchQuery.toLowerCase())
+    user.username.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    user.email.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (
@@ -209,11 +208,11 @@ export default function AdminsPage() {
                     <tr key={user.id} style={styles.tr}>
                       <td style={styles.td}>
                         <div style={styles.userCell}>
-                          <div style={styles.avatarPlaceholder}>{user.user_name[0].toUpperCase()}</div>
-                          <span style={{fontWeight: 500}}>{user.user_name}</span>
+                          <div style={styles.avatarPlaceholder}>{user.username[0].toUpperCase()}</div>
+                          <span style={{fontWeight: 500}}>{user.username}</span>
                         </div>
                       </td>
-                      <td style={styles.td}>{user.user_email}</td>
+                      <td style={styles.td}>{user.email}</td>
                       <td style={styles.td}>
                         <span style={styles.roleBadge}>
                           <Shield size={12} /> ADMIN
