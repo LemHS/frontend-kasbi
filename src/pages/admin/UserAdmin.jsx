@@ -287,7 +287,7 @@ export default function AdminsPage() {
                   required
                   value={formData.username}
                   onChange={handleInputChange}
-                  style={modalMode === 'edit' ? {...styles.input, ...styles.inputDisabled} : styles.input}
+                  style={styles.input}
                   disabled={modalMode === 'edit'}
                 />
               </div>
