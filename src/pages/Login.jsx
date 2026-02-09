@@ -40,7 +40,7 @@ export default function Login() {
         if (userData && userData.role === "admin") {
           navigate("/admin/chatbot");
         } else if (userData && userData.role === "superadmin") {
-          navigate("/superadmin/chatbot");
+          navigate("/admin/chatbot");
         } else {
           navigate("/chatbot");
         }
