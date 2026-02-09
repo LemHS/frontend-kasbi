@@ -32,7 +32,7 @@ export const adminService = {
 
   // GET: Available to standard Admins (admin_router)
   async getUsers(offset = 0, limit = 10) {
-    const response = await api.get("/v1/admin/users", {
+    const response = await api.get("/v1/superadmin/users", {
       params: { offset, limit, descending: true },
     });
     return response.data;
