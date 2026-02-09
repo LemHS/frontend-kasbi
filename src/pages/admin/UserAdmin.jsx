@@ -288,7 +288,6 @@ export default function AdminsPage() {
                   value={formData.username}
                   onChange={handleInputChange}
                   style={styles.input}
-                  disabled={modalMode === 'edit'}
                 />
               </div>
 
