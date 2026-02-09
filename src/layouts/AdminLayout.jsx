@@ -8,7 +8,8 @@ import {
   Menu, 
   X,
   User,
-  ChevronLeft
+  ChevronLeft,
+  Shield // Added Shield icon for the Superadmin menu
 } from "lucide-react";
 import kasbiLogo from "../assets/images/kasbi-logo.png";
 
@@ -27,8 +28,10 @@ export default function AdminLayout() {
 
   // --- 2. PROTECT ROUTE & HANDLE RESIZE ---
   useEffect(() => {
-    // Auth Check
-    if (!userData?.role || userData.role !== "admin") {
+    // Auth Check: Allow both 'admin' and 'superadmin'
+    const allowedRoles = ["admin", "superadmin"];
+    
+    if (!userData?.role || !allowedRoles.includes(userData.role)) {
       navigate("/login");
     } else {
       setIsAuthorized(true);
@@ -57,18 +60,32 @@ export default function AdminLayout() {
     }
   };
 
-  const navItems = [
+  // --- NAVIGATION CONFIGURATION ---
+  const allNavItems = [
     {
       path: "/admin/chatbot",
       label: "Chatbot KASBI",
-      icon: <MessageSquare size={20} />
+      icon: <MessageSquare size={20} />,
+      allowedRoles: ["admin", "superadmin"]
     },
     {
       path: "/admin/dokumen",
       label: "Manajemen Dokumen",
-      icon: <FileText size={20} />
+      icon: <FileText size={20} />,
+      allowedRoles: ["admin", "superadmin"]
+    },
+    {
+      path: "/admin/admin",
+      label: "Kelola Admin",
+      icon: <Shield size={20} />,
+      allowedRoles: ["superadmin"] // Only for superadmin
     }
   ];
+
+  // Filter items based on current user role
+  const visibleNavItems = allNavItems.filter(item => 
+    item.allowedRoles.includes(userData.role)
+  );
 
   if (!isAuthorized) return null;
 
@@ -117,7 +134,7 @@ export default function AdminLayout() {
 
         {/* Navigation */}
         <nav style={styles.navContainer}>
-          {navItems.map((item) => (
+          {visibleNavItems.map((item) => (
             <NavLink
               key={item.path}
               to={item.path}
@@ -144,7 +161,7 @@ export default function AdminLayout() {
                 {userData.username || "Admin"}
               </div>
               <div style={styles.userRole}>
-                {userData.role || "Administrator"}
+                {userData.role ? userData.role.toUpperCase() : "ADMIN"}
               </div>
             </div>
           </div>
