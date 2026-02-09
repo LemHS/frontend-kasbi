@@ -11,7 +11,7 @@ import {
   ChevronLeft,
   ChevronRight
 } from "lucide-react";
-import { adminService } from "../../services/admin.service"; // Import the service
+import { adminService } from "../../services/admin.service";
 
 export default function AdminsPage() {
   // --- STATE ---
@@ -34,7 +34,6 @@ export default function AdminsPage() {
     username: "",
     email: "",
     password: "",
-    full_name: "",
     is_active: true
   });
 
@@ -42,10 +41,7 @@ export default function AdminsPage() {
   const fetchUsers = async () => {
     setLoading(true);
     try {
-      // Use service to get users
       const response = await adminService.getUsers(offset, limit);
-      
-      // Access data based on APIResponse structure: { data: { user_items: [] } }
       const fetchedUsers = response.data?.user_items || [];
       setUsers(fetchedUsers);
       setError(null);
@@ -74,18 +70,19 @@ export default function AdminsPage() {
 
   const openCreateModal = () => {
     setModalMode("create");
-    setFormData({ username: "", email: "", password: "", full_name: "", is_active: true });
+    // Removed full_name
+    setFormData({ username: "", email: "", password: "", is_active: true });
     setIsModalOpen(true);
   };
 
   const openEditModal = (user) => {
     setModalMode("edit");
     setCurrentUser(user);
+    // Removed full_name
     setFormData({ 
       username: user.username, 
       email: user.email, 
       password: "", 
-      full_name: "", 
       is_active: true 
     });
     setIsModalOpen(true);
@@ -97,7 +94,6 @@ export default function AdminsPage() {
 
     try {
       if (modalMode === "create") {
-        // Use service to create user
         await adminService.createUser({
           username: formData.username,
           email: formData.email,
@@ -105,13 +101,10 @@ export default function AdminsPage() {
         });
         alert("Admin berhasil ditambahkan!");
       } else {
-        // Prepare update payload
         const updatePayload = {};
         if (formData.password) updatePayload.password = formData.password;
         if (formData.username) updatePayload.username = formData.username;
-        updatePayload.email = formData.email;
 
-        // Use service to update user
         await adminService.updateUser(currentUser.id, updatePayload);
         alert("Data admin berhasil diperbarui!");
       }
@@ -129,7 +122,6 @@ export default function AdminsPage() {
     if (!window.confirm(`Yakin ingin menghapus admin "${user.username}"?`)) return;
 
     try {
-      // Use service to delete user
       await adminService.deleteUser({
         username: user.username,
         email: user.email
@@ -295,8 +287,8 @@ export default function AdminsPage() {
                   required
                   value={formData.username}
                   onChange={handleInputChange}
-                  style={styles.input}
-                  readOnly={modalMode === 'edit'} 
+                  style={modalMode === 'edit' ? {...styles.input, ...styles.inputDisabled} : styles.input}
+                  disabled={modalMode === 'edit'}
                 />
               </div>
 
@@ -308,9 +300,12 @@ export default function AdminsPage() {
                   required
                   value={formData.email}
                   onChange={handleInputChange}
-                  style={styles.input}
-                  readOnly={modalMode === 'edit'}
+                  style={modalMode === 'edit' ? {...styles.input, ...styles.inputDisabled} : styles.input}
+                  disabled={modalMode === 'edit'}
                 />
+                {modalMode === 'edit' && (
+                  <p style={styles.helperText}>Email tidak dapat diubah.</p>
+                )}
               </div>
 
               <div style={styles.formGroup}>
@@ -618,6 +613,17 @@ const styles = {
     fontSize: '14px',
     outline: 'none',
     boxSizing: 'border-box'
+  },
+  inputDisabled: {
+    backgroundColor: '#f3f4f6',
+    cursor: 'not-allowed',
+    color: '#6b7280'
+  },
+  helperText: {
+    fontSize: '12px',
+    color: '#9ca3af',
+    marginTop: '4px',
+    fontStyle: 'italic'
   },
   modalFooter: {
     display: 'flex',
