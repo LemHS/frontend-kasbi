@@ -104,6 +104,7 @@ export default function AdminsPage() {
         const updatePayload = {};
         if (formData.password) updatePayload.password = formData.password;
         if (formData.username) updatePayload.username = formData.username;
+        updatePayload.email = formData.email;
 
         await adminService.updateUser(currentUser.id, updatePayload);
         alert("Data admin berhasil diperbarui!");
