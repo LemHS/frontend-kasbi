@@ -148,7 +148,7 @@
   background: var(--info);
 }
 
-.stat-icon.approved {
+.stat-icon.success {
   background: var(--success);
 }
 
@@ -299,7 +299,7 @@
   height: 20px;
 }
 
-.status-icon.approved {
+.status-icon.success {
   color: var(--success);
 }
 

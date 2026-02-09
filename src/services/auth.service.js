@@ -1,18 +1,19 @@
-import { API_BASE_URL } from "../config";
+import api from "./api";
 
-export async function loginRequest(email, password) {
-  const res = await fetch(`${API_BASE_URL}/v1/auth/login`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ email, password }),
-  });
+export const authService = {
+  async login(credentials) {
+    // Matches router prefix="/v1/auth"
+    const response = await api.post("/v1/auth/login", credentials);
+    return response.data;
+  },
 
-  if (!res.ok) {
-    const err = await res.json().catch(() => null);
-    throw err || { message: "Login gagal" };
-  }
+  async register(data) {
+    const response = await api.post("/v1/auth/register", data);
+    return response.data;
+  },
 
-  return res.json();
-}
+  async logout() {
+    const response = await api.post("/v1/auth/logout");
+    return response.data;
+  },
+};

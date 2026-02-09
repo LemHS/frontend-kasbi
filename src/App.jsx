@@ -5,7 +5,6 @@ import Chatbot from "./pages/Chatbot";
 import NotFound from "./pages/NotFound";
 import AdminLayout from './layouts/AdminLayout';
 import UserLayout from './layouts/UserLayout';
-import AdminDashboard from './pages/admin/Dashboard';
 import DokumenAdmin from './pages/admin/DokumenAdmin';
 
 export default function App() {
@@ -26,8 +25,7 @@ export default function App() {
         
         {/* Admin Routes - Pakai AdminLayout (dengan navbar) */}
         <Route path="/admin" element={<AdminLayout />}>
-          <Route index element={<AdminDashboard />} />
-          <Route path="dashboard" element={<AdminDashboard />} />
+          <Route index element={<DokumenAdmin />} />
           <Route path="dokumen" element={<DokumenAdmin />} />
           <Route path="chatbot" element={<Chatbot />} />
         </Route>

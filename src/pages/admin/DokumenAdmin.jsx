@@ -1,142 +1,225 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import "../../styles/admin.css";
+import Swal from "sweetalert2"; 
+import { adminService } from "../../services/admin.service"; // Adjust path as needed
 import { 
   Upload, 
   FileText, 
   CheckCircle, 
-  XCircle, 
-  Clock, 
   Search, 
-  Filter,
-  Download,
-  Eye,
   Trash2,
   Plus,
-  Edit
+  Loader, 
+  ChevronLeft,
+  ChevronRight,
+  AlertCircle 
 } from "lucide-react";
 
+// Helper to format date
+const formatDate = (dateString) => {
+  if (!dateString) return "-";
+  return new Date(dateString).toLocaleDateString('id-ID', {
+    day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit'
+  });
+};
+
 export default function DokumenAdmin() {
-  const [dokumen, setDokumen] = useState([
-    {
-      id: 1,
-      nama: "Panduan Penggunaan KASBI.pdf",
-      ukuran: "2.5 MB",
-      tipe: "PDF",
-      tanggalUpload: "2024-03-15",
-      status: "Approved",
-      diuploadOleh: "Admin BPMP"
-    },
-    {
-      id: 2,
-      nama: "SOP Pengaduan Layanan.docx",
-      ukuran: "1.8 MB",
-      tipe: "DOCX",
-      tanggalUpload: "2024-03-14",
-      status: "Pending",
-      diuploadOleh: "Staff ULT"
-    },
-    {
-      id: 3,
-      nama: "Jadwal Kegiatan 2024.xlsx",
-      ukuran: "4.1 MB",
-      tipe: "EXCEL",
-      tanggalUpload: "2024-03-12",
-      status: "Approved",
-      diuploadOleh: "Admin Kalender"
-    },
-    {
-      id: 4,
-      nama: "Laporan Triwulan I.pdf",
-      ukuran: "5.7 MB",
-      tipe: "PDF",
-      tanggalUpload: "2024-03-10",
-      status: "Pending",
-      diuploadOleh: "Staff Laporan"
-    }
-  ]);
+  const [dokumen, setDokumen] = useState([]);
+  const [isLoading, setIsLoading] = useState(false); 
+  const [isFetching, setIsFetching] = useState(true); 
+  const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
+  
+  // Search & Filter State
+  const [searchTerm, setSearchTerm] = useState("");
+
+  // Pagination State
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
   const [formData, setFormData] = useState({
-    nama: "",
     file: null,
-    kategori: "",
-    deskripsi: ""
+    nama: "" 
   });
 
-  const [searchTerm, setSearchTerm] = useState("");
-  const [filterStatus, setFilterStatus] = useState("all");
-  const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
-  const [previewFile, setPreviewFile] = useState(null);
-  const [isLoading, setIsLoading] = useState(false);
+  // --- 1. FETCH DOCUMENTS VIA SERVICE ---
+  const fetchDocuments = async () => {
+    try {
+      // Fetching 100 items to handle client-side filtering/pagination easily
+      // You can adjust offset/limit if you want server-side pagination later
+      const result = await adminService.getDocuments(0, 100);
+      
+      if (result.data && result.data.document_items) { 
+        const mappedDocs = result.data.document_items.map((doc) => ({
+          id: doc.document_id,
+          nama: doc.document_name,
+          tanggalUpload: doc.time_upload,
+          diuploadOleh: doc.user,
+          status: doc.document_status,
+        }));
+        setDokumen(mappedDocs);
+      }
+    } catch (error) {
+      console.error("Error fetching documents:", error);
+    } finally {
+      setIsFetching(false);
+    }
+  };
 
-  // Filter dokumen berdasarkan search dan filter
-  const filteredDokumen = dokumen.filter(doc => {
-    const matchesSearch = doc.nama.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         doc.diuploadOleh.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesFilter = filterStatus === "all" || doc.status === filterStatus;
-    return matchesSearch && matchesFilter;
-  });
+  useEffect(() => {
+    fetchDocuments();
+    
+    // Auto-refresh pending documents every 5 seconds
+    const interval = setInterval(() => {
+        setDokumen(currentDocs => {
+            const hasPending = currentDocs.some(d => d.status === 'pending');
+            if(hasPending) fetchDocuments();
+            return currentDocs;
+        });
+    }, 5000);
+    return () => clearInterval(interval);
+  }, []);
 
-  const handleFileUpload = (e) => {
+  // --- 2. FILTER LOGIC ---
+  const filteredDokumen = dokumen.filter(doc => 
+    doc.nama.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    doc.diuploadOleh.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  // --- 3. PAGINATION LOGIC ---
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = filteredDokumen.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(filteredDokumen.length / itemsPerPage);
+
+  const handlePageChange = (pageNumber) => {
+    setCurrentPage(pageNumber);
+  };
+
+  const handleSearchChange = (e) => {
+    setSearchTerm(e.target.value);
+    setCurrentPage(1); 
+  };
+
+  const handleFileSelect = (e) => {
     const file = e.target.files[0];
     if (file) {
-      setFormData(prev => ({
-        ...prev,
+      setFormData({
         file: file,
         nama: file.name
-      }));
+      });
     }
   };
 
+  // --- 5. UPLOAD DOCUMENT VIA SERVICE ---
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!formData.file) return;
+
     setIsLoading(true);
 
-    // Simulasi upload
-    setTimeout(() => {
-      const newDokumen = {
-        id: dokumen.length + 1,
-        nama: formData.nama || formData.file?.name || "File Baru",
-        ukuran: `${(formData.file?.size / (1024 * 1024)).toFixed(1)} MB`,
-        tipe: formData.file?.type?.split('/')[1]?.toUpperCase() || "FILE",
-        tanggalUpload: new Date().toISOString().split('T')[0],
-        status: "Pending",
-        diuploadOleh: "Admin Sekarang"
-      };
+    try {
+      // Pass the raw file; the service handles FormData creation
+      await adminService.uploadDocument(formData.file);
 
-      setDokumen([newDokumen, ...dokumen]);
-      setFormData({ nama: "", file: null, kategori: "", deskripsi: "" });
+      setFormData({ file: null, nama: "" });
       setIsUploadModalOpen(false);
-      setIsLoading(false);
+      await fetchDocuments(); 
       
-      alert("Dokumen berhasil diupload! Status: Pending Review");
-    }, 1500);
-  };
+      Swal.fire({
+        icon: 'success',
+        title: 'Berhasil!',
+        text: 'Dokumen berhasil diupload dan sedang diproses AI.',
+        confirmButtonColor: '#10B981',
+        timer: 3000,
+        timerProgressBar: true
+      });
 
-  const handleStatusChange = (id, status) => {
-    setDokumen(dokumen.map(doc => 
-      doc.id === id ? { ...doc, status } : doc
-    ));
-  };
-
-  const handleDelete = (id) => {
-    if (window.confirm("Apakah Anda yakin ingin menghapus dokumen ini?")) {
-      setDokumen(dokumen.filter(doc => doc.id !== id));
+    } catch (error) {
+      console.error("Upload error:", error);
+      Swal.fire({
+        icon: 'error',
+        title: 'Oops...',
+        text: error.response?.data?.detail || 'Gagal mengupload dokumen. Silakan coba lagi.',
+        confirmButtonColor: '#c8102e'
+      });
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const getStatusIcon = (status) => {
-    switch(status) {
-      case "Approved": return <CheckCircle className="status-icon approved" />;
-      case "Pending": return <Clock className="status-icon pending" />;
-      default: return <Clock className="status-icon pending" />;
+  // --- 6. DELETE DOCUMENT VIA SERVICE ---
+  const handleDelete = async (id) => {
+    const result = await Swal.fire({
+        title: 'Apakah Anda yakin?',
+        text: "Dokumen yang dihapus tidak dapat dikembalikan!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#c8102e', 
+        cancelButtonColor: '#6B7280', 
+        confirmButtonText: 'Ya, Hapus!',
+        cancelButtonText: 'Batal'
+    });
+
+    if (!result.isConfirmed) return;
+
+    try {
+      await adminService.deleteDocument(id);
+
+      setDokumen(prev => prev.filter(doc => doc.id !== id));
+      
+      if (currentItems.length === 1 && currentPage > 1) {
+        setCurrentPage(prev => prev - 1);
+      }
+
+      Swal.fire({
+        title: 'Terhapus!',
+        text: 'Dokumen telah berhasil dihapus.',
+        icon: 'success',
+        confirmButtonColor: '#10B981',
+        timer: 2000,
+        showConfirmButton: false
+      });
+
+    } catch (error) {
+      console.error("Delete error:", error);
+      Swal.fire({
+        icon: 'error',
+        title: 'Gagal',
+        text: error.response?.data?.detail || 'Terjadi kesalahan saat menghapus dokumen.',
+        confirmButtonColor: '#c8102e'
+      });
     }
   };
 
-  const getStatusColor = (status) => {
-    switch(status) {
-      case "Approved": return "#10B981";
-      case "Pending": return "#F59E0B";
-      default: return "#6B7280";
+  // --- HELPER FOR STATUS ICON ---
+  const renderStatus = (status) => {
+    if (status === 'done') {
+      return (
+        <div className="status-cell">
+          <CheckCircle size={18} className="text-emerald-500" style={{marginRight: '8px'}} />
+          <span className="status-text" style={{ color: "#10B981", fontWeight: 500 }}>
+            Selesai
+          </span>
+        </div>
+      );
+    } else if (status === 'pending') {
+      return (
+        <div className="status-cell">
+          <Loader size={18} className="animate-spin text-blue-500" style={{marginRight: '8px'}} />
+          <span className="status-text" style={{ color: "#3B82F6", fontWeight: 500 }}>
+            Proses AI...
+          </span>
+        </div>
+      );
+    } else {
+      return (
+        <div className="status-cell">
+          <AlertCircle size={18} className="text-gray-400" style={{marginRight: '8px'}} />
+          <span className="status-text" style={{ color: "#9CA3AF" }}>
+            {status}
+          </span>
+        </div>
+      );
     }
   };
 
@@ -147,85 +230,31 @@ export default function DokumenAdmin() {
         <div className="header-left">
           <h1 className="page-title">
             <FileText size={28} />
-            Manajemen Dokumen BPMP Papua
+            Manajemen Dokumen
           </h1>
-           <div className="header-actions">
+        </div>
+        <div className="header-actions">
           <button 
             className="btn-primary"
             onClick={() => setIsUploadModalOpen(true)}
           >
             <Plus size={20} />
-            Upload Dokumen Baru
+            Upload Dokumen
           </button>
         </div>
-        </div>
-       
       </header>
 
-      {/* Stats Cards */}
-      <div className="stats-grid">
-        <div className="stat-card">
-          <div className="stat-icon total">
-            <FileText size={24} />
-          </div>
-          <div className="stat-info">
-            <h3>Total Dokumen</h3>
-            <p className="stat-number">{dokumen.length}</p>
-          </div>
-        </div>
-
-        <div className="stat-card">
-          <div className="stat-icon approved">
-            <CheckCircle size={24} />
-          </div>
-          <div className="stat-info">
-            <h3>Approved</h3>
-            <p className="stat-number">
-              {dokumen.filter(d => d.status === "Approved").length}
-            </p>
-          </div>
-        </div>
-
-        <div className="stat-card">
-          <div className="stat-icon pending">
-            <Clock size={24} />
-          </div>
-          <div className="stat-info">
-            <h3>Pending</h3>
-            <p className="stat-number">
-              {dokumen.filter(d => d.status === "Pending").length}
-            </p>
-          </div>
-        </div>
-
-        
-      </div>
-
       {/* Filter & Search Bar */}
-      <div className="filter-bar">
+      <div className="filter-bar" style={{marginTop: '20px'}}>
         <div className="search-box">
           <Search size={20} />
           <input
             type="text"
             placeholder="Cari nama dokumen atau uploader..."
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            onChange={handleSearchChange}
             className="search-input"
           />
-        </div>
-
-        <div className="filter-group">
-          <Filter size={20} />
-          <select 
-            value={filterStatus} 
-            onChange={(e) => setFilterStatus(e.target.value)}
-            className="filter-select"
-          >
-            <option value="all">Semua Status</option>
-            <option value="Approved">Approved</option>
-            <option value="Pending">Pending</option>
-            <option value="Rejected">Rejected</option>
-          </select>
         </div>
       </div>
 
@@ -234,70 +263,43 @@ export default function DokumenAdmin() {
         <table className="dokumen-table">
           <thead>
             <tr>
-              <th>No</th>
+              <th width="50">No</th>
               <th>Nama File</th>
-              <th>Tipe</th>
-              <th>Ukuran</th>
               <th>Tanggal Upload</th>
               <th>Uploader</th>
               <th>Status</th>
-              <th>Aksi</th>
+              <th style={{textAlign: 'center', width: '80px'}}>Aksi</th>
             </tr>
           </thead>
           <tbody>
-            {filteredDokumen.length > 0 ? (
-              filteredDokumen.map((doc, index) => (
+            {isFetching ? (
+               <tr>
+               <td colSpan="6" className="empty-state">
+                 <Loader size={24} className="animate-spin" />
+                 <p>Memuat data...</p>
+               </td>
+             </tr>
+            ) : currentItems.length > 0 ? (
+              currentItems.map((doc, index) => (
                 <tr key={doc.id}>
-                  <td className="text-center">{index + 1}</td>
+                  <td className="text-center">
+                    {indexOfFirstItem + index + 1}
+                  </td>
                   <td>
                     <div className="file-info">
                       <FileText size={18} />
-                      <span className="file-name">{doc.nama}</span>
-                    </div>
-                  </td>
-                  <td>
-                    <span className="file-type">{doc.tipe}</span>
-                  </td>
-                  <td>{doc.ukuran}</td>
-                  <td>{doc.tanggalUpload}</td>
-                  <td>{doc.diuploadOleh}</td>
-                  <td>
-                    <div className="status-cell">
-                      {getStatusIcon(doc.status)}
-                      <span 
-                        className="status-text"
-                        style={{ color: getStatusColor(doc.status) }}
-                      >
-                        {doc.status}
+                      <span className="file-name" title={doc.nama}>
+                        {doc.nama.length > 50 ? doc.nama.substring(0, 50) + "..." : doc.nama}
                       </span>
                     </div>
                   </td>
+                  <td>{formatDate(doc.tanggalUpload)}</td>
+                  <td>{doc.diuploadOleh}</td>
                   <td>
-                    <div className="action-buttons">
-                      <button 
-                        className="btn-icon view"
-                        onClick={() => setPreviewFile(doc)}
-                        title="Preview"
-                      >
-                        <Eye size={18} />
-                      </button>
-                      <button 
-                        className="btn-icon download"
-                        title="Download"
-                      >
-                        <Download size={18} />
-                      </button>
-                      <button 
-                        className="btn-icon edit"
-                        onClick={() => {
-                          if (doc.status === "Pending") {
-                            handleStatusChange(doc.id, "Approved");
-                          }
-                        }}
-                        title="Approve"
-                      >
-                        <CheckCircle size={18} />
-                      </button>
+                    {renderStatus(doc.status)}
+                  </td>
+                  <td>
+                    <div className="action-buttons" style={{justifyContent: 'center'}}>
                       <button 
                         className="btn-icon delete"
                         onClick={() => handleDelete(doc.id)}
@@ -311,7 +313,7 @@ export default function DokumenAdmin() {
               ))
             ) : (
               <tr>
-                <td colSpan="8" className="empty-state">
+                <td colSpan="6" className="empty-state">
                   <FileText size={48} />
                   <p>Tidak ada dokumen yang ditemukan</p>
                 </td>
@@ -320,6 +322,38 @@ export default function DokumenAdmin() {
           </tbody>
         </table>
       </div>
+
+      {/* Pagination Controls */}
+      {!isFetching && filteredDokumen.length > 0 && (
+        <div className="pagination">
+          <button 
+            className="page-btn" 
+            onClick={() => handlePageChange(currentPage - 1)}
+            disabled={currentPage === 1}
+          >
+            <ChevronLeft size={16} /> Prev
+          </button>
+          
+          <button 
+            className="page-btn active"
+            style={{cursor: 'default'}}
+          >
+            {currentPage}
+          </button>
+
+          <button 
+            className="page-btn" 
+            onClick={() => handlePageChange(currentPage + 1)}
+            disabled={currentPage === totalPages}
+          >
+            Next <ChevronRight size={16} />
+          </button>
+          
+          <span className="page-info">
+             dari {totalPages}
+          </span>
+        </div>
+      )}
 
       {/* Modal Upload Dokumen */}
       {isUploadModalOpen && (
@@ -340,51 +374,14 @@ export default function DokumenAdmin() {
 
             <form onSubmit={handleSubmit} className="upload-form">
               <div className="form-group">
-                <label>Nama Dokumen *</label>
-                <input
-                  type="text"
-                  value={formData.nama}
-                  onChange={(e) => setFormData({...formData, nama: e.target.value})}
-                  placeholder="Contoh: SOP Layanan 2024"
-                  required
-                />
-              </div>
-
-              <div className="form-group">
-                <label>Kategori</label>
-                <select
-                  value={formData.kategori}
-                  onChange={(e) => setFormData({...formData, kategori: e.target.value})}
-                >
-                  <option value="">Pilih Kategori</option>
-                  <option value="sop">SOP</option>
-                  <option value="formulir">Formulir</option>
-                  <option value="laporan">Laporan</option>
-                  <option value="panduan">Panduan</option>
-                  <option value="jadwal">Jadwal</option>
-                </select>
-              </div>
-
-              <div className="form-group">
-                <label>Deskripsi</label>
-                <textarea
-                  value={formData.deskripsi}
-                  onChange={(e) => setFormData({...formData, deskripsi: e.target.value})}
-                  placeholder="Deskripsi singkat tentang dokumen..."
-                  rows="3"
-                />
-              </div>
-
-              <div className="form-group">
                 <label>File Dokumen *</label>
                 <div className="file-upload-area">
                   <Upload size={32} />
                   <p>Drag & drop file atau klik untuk memilih</p>
-                  <p className="file-hint">Format: PDF, DOCX, XLSX, JPG (Max: 10MB)</p>
                   <input
                     type="file"
-                    onChange={handleFileUpload}
-                    accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png"
+                    onChange={handleFileSelect}
+                    accept=".pdf,.doc,.docx,.xls,.xlsx,.txt,.md"
                     required
                   />
                   {formData.file && (
@@ -414,7 +411,7 @@ export default function DokumenAdmin() {
                 >
                   {isLoading ? (
                     <>
-                      <span className="loading-spinner"></span>
+                      <Loader size={18} className="animate-spin" style={{marginRight: '8px'}} />
                       Mengupload...
                     </>
                   ) : (
@@ -429,85 +426,6 @@ export default function DokumenAdmin() {
           </div>
         </div>
       )}
-
-      {/* Modal Preview File */}
-      {previewFile && (
-        <div className="modal-overlay">
-          <div className="modal-container preview-modal">
-            <div className="modal-header">
-              <h2>Preview Dokumen</h2>
-              <button 
-                className="modal-close"
-                onClick={() => setPreviewFile(null)}
-              >
-                &times;
-              </button>
-            </div>
-            
-            <div className="preview-content">
-              <div className="preview-header">
-                <div className="file-icon-large">
-                  <FileText size={48} />
-                </div>
-                <div className="preview-info">
-                  <h3>{previewFile.nama}</h3>
-                  <div className="file-meta">
-                    <span>Tipe: {previewFile.tipe}</span>
-                    <span>Ukuran: {previewFile.ukuran}</span>
-                    <span>Upload: {previewFile.tanggalUpload}</span>
-                  </div>
-                  <div className="preview-status">
-                    {getStatusIcon(previewFile.status)}
-                    <span style={{ color: getStatusColor(previewFile.status) }}>
-                      {previewFile.status}
-                    </span>
-                  </div>
-                </div>
-              </div>
-              
-              <div className="preview-actions">
-                <button className="btn-primary">
-                  <Download size={20} />
-                  Download
-                </button>
-                {previewFile.status === "Pending" && (
-                  <>
-                    <button 
-                      className="btn-success"
-                      onClick={() => {
-                        handleStatusChange(previewFile.id, "Approved");
-                        setPreviewFile(null);
-                      }}
-                    >
-                      <CheckCircle size={20} />
-                      Approve
-                    </button>
-                    <button 
-                      className="btn-danger"
-                      onClick={() => {
-                        handleStatusChange(previewFile.id, "Rejected");
-                        setPreviewFile(null);
-                      }}
-                    >
-                      <XCircle size={20} />
-                      Reject
-                    </button>
-                  </>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Pagination */}
-      <div className="pagination">
-        <button className="page-btn" disabled>‹ Prev</button>
-        <button className="page-btn active">1</button>
-        <button className="page-btn">2</button>
-        <button className="page-btn">3</button>
-        <button className="page-btn">Next ›</button>
-      </div>
     </div>
   );
 }

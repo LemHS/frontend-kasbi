@@ -3,13 +3,19 @@ import "../styles/user-layout.css";
 import kasbiLogo from "../assets/images/kasbi-logo.png";
 import { Send, MessageSquare, Clock, User, LogOut, ChevronRight, ChevronLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { chatService } from "../services/chatbot.service"; // Updated import
 
 export default function ChatbotUser() {
   const navigate = useNavigate();
   
+  // --- 1. INITIALIZE THREAD ID FROM LOCAL STORAGE ---
+  const [threadId, setThreadId] = useState(() => {
+    return localStorage.getItem("chat_thread_id") || null;
+  });
+
   const [messages, setMessages] = useState([
     {
-      id: 1,
+      id: "init-1",
       sender: "bot",
       text: "Halo! 😊 Saya KASBI (Kawan Setia Berbagi Informasi), chatbot resmi BPMP Papua. Ada yang bisa saya bantu hari ini?",
       time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
@@ -18,20 +24,19 @@ export default function ChatbotUser() {
 
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
-  const [sidebarOpen, setSidebarOpen] = useState(true); // Sidebar default terbuka
+  const [sidebarOpen, setSidebarOpen] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
 
-  // Ambil user info dari localStorage
-  const storedUser = JSON.parse(localStorage.getItem("user_info")) || {};
+  // User Data
+  const storedUser = JSON.parse(localStorage.getItem("user_data")) || {};
   const userInfo = {
-    name: storedUser.name || "Pengguna BPMP",
-    email: storedUser.email || "user@bpmp.papua.go.id"
+    name: storedUser.username || "Pengguna BPMP",
+    email: storedUser.username ? `${storedUser.username}@kasbi.id` : "user@bpmp.papua.go.id"
   };
 
   const endRef = useRef(null);
   const textareaRef = useRef(null);
 
-  // QUICK QUESTIONS untuk user biasa
   const QUICK_QUESTIONS = [
     { text: "Apa itu BPMP Papua?", icon: "🏛️" },
     { text: "Program prioritas BPMP?", icon: "🎯" },
@@ -45,24 +50,21 @@ export default function ChatbotUser() {
     { text: "FAQ", icon: "❓" }
   ];
 
-  // Cek mobile
   useEffect(() => {
     const checkMobile = () => {
       const mobile = window.innerWidth < 768;
       setIsMobile(mobile);
-      if (mobile) setSidebarOpen(false); // Di mobile, sidebar default tertutup
+      if (mobile) setSidebarOpen(false);
     };
     checkMobile();
     window.addEventListener('resize', checkMobile);
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  // Auto scroll ke pesan terbaru
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, loading]);
 
-  // Auto-resize textarea
   useEffect(() => {
     if (textareaRef.current) {
       textareaRef.current.style.height = "60px";
@@ -71,7 +73,46 @@ export default function ChatbotUser() {
     }
   }, [input]);
 
-  const sendMessage = (text) => {
+  // --- 2. FETCH HISTORY LOGIC ---
+  useEffect(() => {
+    const fetchHistory = async () => {
+      if (!threadId) return;
+
+      try {
+        // Updated to use Service
+        const result = await chatService.getHistory(threadId);
+        const historyData = result.data.chats; // Accessing response.data -> chats
+
+        if (historyData && historyData.length > 0) {
+          const formattedHistory = historyData.map((chat, index) => ({
+            id: `history-${index}`,
+            // Backend sends 'user' or 'chatbot'. Frontend expects 'user' or 'bot'.
+            sender: chat.role === "user" ? "user" : "bot",
+            text: chat.message,
+            time: new Date(chat.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+          }));
+
+          // Keep the initial greeting, then append history
+          setMessages((prev) => {
+            const greeting = prev.find(m => m.id === "init-1");
+            return greeting ? [greeting, ...formattedHistory] : formattedHistory;
+          });
+        }
+      } catch (error) {
+        console.error("Failed to load history:", error);
+        // If thread invalid/not found, clear storage to start fresh
+        if (error.response && error.response.status === 404) {
+          localStorage.removeItem("chat_thread_id");
+          setThreadId(null);
+        }
+      }
+    };
+
+    fetchHistory();
+  }, [threadId]);
+
+  // --- MAIN SEND LOGIC ---
+  const sendMessage = async (text) => {
     if (!text.trim()) return;
 
     const newMsg = {
@@ -84,36 +125,41 @@ export default function ChatbotUser() {
     setMessages((prev) => [...prev, newMsg]);
     setInput("");
     setLoading(true);
-    if (isMobile) setSidebarOpen(false); // Tutup sidebar di mobile saat kirim pesan
+    if (isMobile) setSidebarOpen(false);
 
-    // Simulasi response AI
-    setTimeout(() => {
-      const responses = {
-        "Apa itu BPMP Papua?": "BPMP Papua adalah Balai Pengembangan Multimedia Pendidikan yang bertugas mengembangkan konten pendidikan digital untuk wilayah Papua.",
-        "Program prioritas BPMP?": "Program prioritas BPMP Papua meliputi:\n• Pengembangan bahan ajar digital\n• Pelatihan guru teknologi pendidikan\n• Infrastruktur TIK pendidikan\n• Konten edukasi budaya Papua",
-        "Cara hubungi ULT BPMP?": "Hubungi ULT BPMP melalui:\n📧 Email: ult@bpmp.papua.go.id\n📞 Telp: (0967) 531-123\n📍 Lokasi: Gedung Teknologi Lantai 3",
-        "Tugas dan fungsi BPMP?": "Tugas utama BPMP Papua:\n• Mengembangkan multimedia pendidikan\n• Menyediakan layanan teknologi informasi\n• Melaksanakan pelatihan\n• Mengelola sistem informasi",
-        "Lokasi kantor BPMP": "Alamat:\nJl. Pendidikan No. 123, Jayapura\nPapua 99111\n\n📱 (0967) 531-000\n📧 info@bpmp.papua.go.id",
-        "Layanan yang tersedia": "Layanan:\n• Konsultasi teknologi pendidikan\n• Pengembangan konten digital\n• Pelatihan multimedia\n• Sistem informasi sekolah",
-        "Ajukan pelatihan": "Ajukan pelatihan:\n1. Download formulir di website\n2. Isi formulir lengkap\n3. Submit ke email pelatihan\n4. Tunggu konfirmasi tim",
-        "Download formulir": "Formulir online:\n🌐 https://bpmp.papua.go.id/download\n\nPilih formulir:\n• Permohonan Layanan\n• Pengajuan Pelatihan\n• Laporan Kegiatan",
-        "Jadwal kegiatan": "Jadwal terbaru:\n• Pelatihan Guru: 15-17 Maret\n• Workshop: 22 Maret\n• Sosialisasi: 28 Maret\n\nLihat lengkap di website",
-        "FAQ": "Pertanyaan sering diajukan:\n1. Cara akses materi?\n2. Prosedur pelatihan?\n3. Syarat pengajuan?\n\nLihat semua di halaman FAQ website"
-      };
+    try {
+      // Updated to use Service
+      // Service handles the payload structure
+      const result = await chatService.sendMessage(text, threadId);
+      const data = result.data; // Accessing response.data
 
-      const replyText = responses[text] || 
-        "Terima kasih atas pertanyaannya. Untuk informasi lebih detail, silakan hubungi langsung ke kantor BPMP Papua.";
+      // --- 3. SAVE THREAD ID TO LOCAL STORAGE ---
+      if (data.thread_id) {
+        setThreadId(data.thread_id);
+        localStorage.setItem("chat_thread_id", data.thread_id);
+      }
 
       const reply = {
         id: Date.now() + 1,
         sender: "bot",
-        text: replyText,
+        text: data.answer || "Maaf, saya tidak mendapatkan jawaban.",
         time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       };
 
       setMessages((prev) => [...prev, reply]);
+
+    } catch (error) {
+      console.error("Chat API Error:", error);
+      const errorMsg = {
+        id: Date.now() + 1,
+        sender: "bot",
+        text: "Maaf, terjadi kesalahan saat menghubungi server KASBI. Silakan coba lagi.",
+        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      };
+      setMessages((prev) => [...prev, errorMsg]);
+    } finally {
       setLoading(false);
-    }, 800);
+    }
   };
 
   const handleLogout = () => {
@@ -132,7 +178,7 @@ export default function ChatbotUser() {
 
   return (
     <div className="chatbot-user-layout">
-      {/* SIDEBAR KIRI - Quick Questions */}
+      {/* SIDEBAR KIRI */}
       <aside className={`chat-sidebar ${sidebarOpen ? 'open' : 'closed'}`}>
         <div className="sidebar-header">
           <div className="sidebar-toggle" onClick={() => setSidebarOpen(!sidebarOpen)}>
@@ -166,7 +212,7 @@ export default function ChatbotUser() {
         </div>
       </aside>
 
-      {/* MAIN CHAT AREA - Full width di kanan */}
+      {/* MAIN CHAT AREA */}
       <main className="chat-main-area">
         {/* HEADER */}
         <header className="chat-header">
@@ -203,7 +249,7 @@ export default function ChatbotUser() {
           </div>
         </header>
 
-        {/* CHAT MESSAGES - FULL WIDTH */}
+        {/* MESSAGES */}
         <div className="chat-messages-container">
           <div className="chat-messages">
             {messages.map((msg) => (
@@ -237,7 +283,7 @@ export default function ChatbotUser() {
                     <span></span>
                     <span></span>
                   </div>
-                  <div className="typing-text">KASBI sedang mengetik...</div>
+                  <div className="typing-text">KASBI sedang berpikir...</div>
                 </div>
               </div>
             )}
@@ -246,7 +292,7 @@ export default function ChatbotUser() {
           </div>
         </div>
 
-        {/* INPUT AREA */}
+        {/* INPUT */}
         <div className="chat-input-area">
           <div className="input-wrapper">
             <textarea
@@ -290,7 +336,7 @@ export default function ChatbotUser() {
         </footer>
       </main>
 
-      {/* OVERLAY untuk mobile */}
+      {/* OVERLAY */}
       {isMobile && sidebarOpen && (
         <div 
           className="sidebar-overlay" 
