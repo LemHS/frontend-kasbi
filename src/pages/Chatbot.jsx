@@ -102,14 +102,24 @@ export default function Chatbot() {
 
         if (historyData && historyData.length > 0) {
           const formattedHistory = historyData.map((chat, index) => {
-            // Fix Date Parsing: Replace space with T to handle "2026-02-10 06:12:37..." format
-            console.log(chat.created_at);
-            const safeDateString = chat.created_at ? chat.created_at.replace(" ", "T") : new Date().toISOString();
+            // 1. Ambil string tanggal atau gunakan waktu sekarang jika null
+            let safeDateString = chat.created_at || new Date().toISOString();
+
+            // 2. Ganti spasi dengan "T" untuk kompatibilitas ISO (jika server mengirim "2026-02-10 06:xx")
+            safeDateString = safeDateString.replace(" ", "T");
+
+            // 3. PENTING: Jika tidak ada penanda zona waktu (Z atau +...), tambahkan "Z"
+            // Ini memberitahu browser bahwa waktu dari server adalah UTC, bukan waktu lokal.
+            if (!safeDateString.endsWith("Z") && !/[+\-]\d{2}:?\d{2}/.test(safeDateString)) {
+              safeDateString += "Z";
+            }
+
             const dateObj = new Date(safeDateString);
+
+            // Format waktu ke jam:menit lokal (misal: UTC 06:12 -> WIB 13:12)
             const timeString = isNaN(dateObj.getTime()) 
               ? new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) 
               : dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-            console.log(timeString);
 
             return {
               id: `history-${index}`,
