@@ -103,11 +103,13 @@ export default function Chatbot() {
         if (historyData && historyData.length > 0) {
           const formattedHistory = historyData.map((chat, index) => {
             // Fix Date Parsing: Replace space with T to handle "2026-02-10 06:12:37..." format
+            console.log(chat.created_at);
             const safeDateString = chat.created_at ? chat.created_at.replace(" ", "T") : new Date().toISOString();
             const dateObj = new Date(safeDateString);
             const timeString = isNaN(dateObj.getTime()) 
               ? new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) 
               : dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            console.log(timeString);
 
             return {
               id: `history-${index}`,
