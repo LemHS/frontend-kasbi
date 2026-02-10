@@ -84,13 +84,35 @@ export default function ChatbotUser() {
         const historyData = result.data.chats; // Accessing response.data -> chats
 
         if (historyData && historyData.length > 0) {
-          const formattedHistory = historyData.map((chat, index) => ({
-            id: `history-${index}`,
-            // Backend sends 'user' or 'chatbot'. Frontend expects 'user' or 'bot'.
-            sender: chat.role === "user" ? "user" : "bot",
-            text: chat.message,
-            time: new Date(chat.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-          }));
+          const formattedHistory = historyData.map((chat, index) => {
+            // --- FIX DATE PARSING START ---
+            // 1. Ambil string tanggal atau gunakan waktu sekarang jika null
+            let safeDateString = chat.created_at || new Date().toISOString();
+
+            // 2. Ganti spasi dengan "T" untuk kompatibilitas ISO
+            safeDateString = safeDateString.replace(" ", "T");
+
+            // 3. Tambahkan "Z" jika belum ada offset, agar dibaca sebagai UTC
+            if (!safeDateString.endsWith("Z") && !/[+\-]\d{2}:?\d{2}/.test(safeDateString)) {
+              safeDateString += "Z";
+            }
+
+            const dateObj = new Date(safeDateString);
+            
+            // 4. Format ke waktu lokal
+            const timeString = isNaN(dateObj.getTime()) 
+              ? new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) 
+              : dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            // --- FIX DATE PARSING END ---
+
+            return {
+              id: `history-${index}`,
+              // Backend sends 'user' or 'chatbot'. Frontend expects 'user' or 'bot'.
+              sender: chat.role === "user" ? "user" : "bot",
+              text: chat.message,
+              time: timeString
+            };
+          });
 
           // Keep the initial greeting, then append history
           setMessages((prev) => {
