@@ -70,7 +70,6 @@ export default function AdminsPage() {
 
   const openCreateModal = () => {
     setModalMode("create");
-    // Removed full_name
     setFormData({ username: "", email: "", password: "", is_active: true });
     setIsModalOpen(true);
   };
@@ -78,7 +77,6 @@ export default function AdminsPage() {
   const openEditModal = (user) => {
     setModalMode("edit");
     setCurrentUser(user);
-    // Removed full_name
     setFormData({ 
       username: user.username, 
       email: user.email, 

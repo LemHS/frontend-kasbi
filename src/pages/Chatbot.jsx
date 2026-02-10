@@ -97,17 +97,25 @@ export default function Chatbot() {
       if (!threadId) return;
 
       try {
-        // Updated to use Service
         const result = await chatService.getHistory(threadId);
-        const historyData = result.data.chats; // accessing response.data -> chats
+        const historyData = result.data.chats; 
 
         if (historyData && historyData.length > 0) {
-          const formattedHistory = historyData.map((chat, index) => ({
-            id: `history-${index}`,
-            sender: chat.role === "user" ? "user" : "bot", 
-            text: chat.message,
-            time: new Date(chat.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-          }));
+          const formattedHistory = historyData.map((chat, index) => {
+            // Fix Date Parsing: Replace space with T to handle "2026-02-10 06:12:37..." format
+            const safeDateString = chat.created_at ? chat.created_at.replace(" ", "T") : new Date().toISOString();
+            const dateObj = new Date(safeDateString);
+            const timeString = isNaN(dateObj.getTime()) 
+              ? new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) 
+              : dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+            return {
+              id: `history-${index}`,
+              sender: chat.role === "user" ? "user" : "bot", 
+              text: chat.message,
+              time: timeString
+            };
+          });
 
           // Keep the initial greeting, then append history
           setMessages((prev) => {
@@ -146,8 +154,6 @@ export default function Chatbot() {
     setShowQuickQuestions(false);
 
     try {
-      // Updated to use Service
-      // Note: integer parsing is now handled inside the service, but passing raw threadId is fine
       const result = await chatService.sendMessage(text, threadId);
       const data = result.data; 
 
