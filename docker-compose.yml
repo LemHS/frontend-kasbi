@@ -1,0 +1,17 @@
+# Source - https://stackoverflow.com/a
+# Posted by JPG, modified by community. See post 'Timeline' for change history
+# Retrieved 2026-01-22, License - CC BY-SA 4.0
+services:
+
+  frontend:
+    build:
+      context: .
+    container_name: fe01
+    expose:
+      - 3000
+    networks:
+      - dokploy-network
+
+networks:
+  dokploy-network:
+    external: true
