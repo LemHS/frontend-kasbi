@@ -320,7 +320,7 @@ export default function ChatbotUser() {
             <textarea
               ref={textareaRef}
               value={input}
-              placeholder="Tulis pertanyaan Anda tentang BPMP Papua..."
+              placeholder="Tulis pertanyaan Anda..."
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
               rows="2"
