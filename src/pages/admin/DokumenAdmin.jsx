@@ -15,15 +15,27 @@ import {
   AlertCircle 
 } from "lucide-react";
 
-// --- FIX DATE PARSING ---
+// --- NEW HELPER: UNIFIED DATE PARSER ---
+const parseDate = (dateString) => {
+  if (!dateString) return null;
+  
+  // 1. Buang bagian mikrodetik (apapun setelah titik) agar aman di semua browser
+  // "2026-02-23T03:41:56.227944" -> "2026-02-23T03:41:56"
+  let safeStr = dateString.replace(" ", "T").split('.')[0];
+  
+  // 2. Tambahkan "Z" jika backend mengirim waktu UTC. 
+  // PENTING: Jika backend sebenarnya sudah mengirim waktu LOKAL (WIB), HAPUS baris di bawah ini!
+  safeStr += "Z"; 
+
+  const dateObj = new Date(safeStr);
+  return isNaN(dateObj.getTime()) ? null : dateObj;
+};
+
+// --- HELPER UNTUK TAMPILAN FORMAT ---
 const formatDate = (dateString) => {
-  if (!dateString) return "-";
-  let safeDateString = dateString.replace(" ", "T");
-  if (!safeDateString.endsWith("Z") && !/[+\-]\d{2}:?\d{2}/.test(safeDateString)) {
-    safeDateString += "Z";
-  }
-  const dateObj = new Date(safeDateString);
-  if (isNaN(dateObj.getTime())) return "-";
+  const dateObj = parseDate(dateString);
+  if (!dateObj) return "-";
+  
   return dateObj.toLocaleDateString('id-ID', {
     day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit'
   });
@@ -48,7 +60,6 @@ export default function DokumenAdmin() {
   });
 
   // --- REFS ---
-  // Gunakan ref untuk melacak dokumen mana yang sedang di-"force update" agar API tidak kena spam
   const updatingDocsRef = useRef(new Set());
 
   // --- 1. FETCH DOCUMENTS VIA SERVICE ---
@@ -67,41 +78,33 @@ export default function DokumenAdmin() {
         
         setDokumen(mappedDocs);
 
-        // --- NEW LOGIC: CHECK STUCK PENDING DOCUMENTS ---
+        // --- CHECK STUCK PENDING DOCUMENTS ---
         const now = Date.now();
         const TEN_MINUTES_MS = 10 * 60 * 1000;
 
         mappedDocs.forEach(async (doc) => {
-          // Cek jika status masih pending dan belum sedang di-update oleh fungsi ini
           if (doc.status === 'pending' && !updatingDocsRef.current.has(doc.id)) {
             
-            // Lakukan parsing waktu UTC yang sama dengan helper kita
-            let safeDateString = doc.tanggalUpload.replace(" ", "T");
-            if (!safeDateString.endsWith("Z") && !/[+\-]\d{2}:?\d{2}/.test(safeDateString)) {
-              safeDateString += "Z";
-            }
-            const uploadTime = new Date(safeDateString).getTime();
-
-            // Jika valid dan selisihnya lebih dari 10 menit (600.000 ms)
-            if (!isNaN(uploadTime) && (now - uploadTime) > TEN_MINUTES_MS) {
+            // Gunakan parser terpusat yang sudah dibersihkan dari mikrodetik
+            const uploadDateObj = parseDate(doc.tanggalUpload);
+            
+            if (uploadDateObj) {
+              const uploadTime = uploadDateObj.getTime();
               
-              // Tambahkan ke Set agar tidak terpanggil lagi di detik ke-5 berikutnya
-              updatingDocsRef.current.add(doc.id);
-              
-              try {
-                console.log(`Document ${doc.id} is stuck. Forcing status update...`);
-                await adminService.changeDocumentStatus(doc.id);
-                // Fungsi setInterval otomatis akan memanggil fetchDocuments lagi setelah ini
-              } catch (error) {
-                console.error(`Gagal mengupdate status untuk dokumen ${doc.id}:`, error);
-                // Hapus dari Set agar bisa dicoba lagi di percobaan berikutnya
-                updatingDocsRef.current.delete(doc.id);
+              if ((now - uploadTime) > TEN_MINUTES_MS) {
+                updatingDocsRef.current.add(doc.id);
+                
+                try {
+                  console.log(`Document ${doc.id} is stuck. Forcing status update...`);
+                  await adminService.changeDocumentStatus(doc.id);
+                } catch (error) {
+                  console.error(`Gagal mengupdate status untuk dokumen ${doc.id}:`, error);
+                  updatingDocsRef.current.delete(doc.id);
+                }
               }
             }
           }
         });
-        // --- END NEW LOGIC ---
-
       }
     } catch (error) {
       console.error("Error fetching documents:", error);
@@ -113,7 +116,6 @@ export default function DokumenAdmin() {
   useEffect(() => {
     fetchDocuments();
     
-    // Auto-refresh pending documents every 5 seconds
     const interval = setInterval(() => {
         setDokumen(currentDocs => {
             const hasPending = currentDocs.some(d => d.status === 'pending');
