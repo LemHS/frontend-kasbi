@@ -28,6 +28,11 @@ export const adminService = {
     return response.data;
   },
 
+  async changeDocumentStatus(documentId) {
+    const response = await api.put(`/v1/admin/documents/${documentId}`);
+    return response.data;
+  },
+
   // --- USER MANAGEMENT (ADMINS) ---
 
   // GET: Available to standard Admins (admin_router)

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import "../../styles/admin.css";
 import Swal from "sweetalert2"; 
 import { adminService } from "../../services/admin.service"; // Adjust path as needed
@@ -18,20 +18,12 @@ import {
 // --- FIX DATE PARSING ---
 const formatDate = (dateString) => {
   if (!dateString) return "-";
-
-  // 1. Ganti spasi dengan "T"
   let safeDateString = dateString.replace(" ", "T");
-
-  // 2. Tambahkan "Z" jika tidak ada indikator zona waktu
   if (!safeDateString.endsWith("Z") && !/[+\-]\d{2}:?\d{2}/.test(safeDateString)) {
     safeDateString += "Z";
   }
-
   const dateObj = new Date(safeDateString);
-
-  // 3. Fallback jika tanggal tetap invalid
   if (isNaN(dateObj.getTime())) return "-";
-
   return dateObj.toLocaleDateString('id-ID', {
     day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit'
   });
@@ -55,11 +47,13 @@ export default function DokumenAdmin() {
     nama: "" 
   });
 
+  // --- REFS ---
+  // Gunakan ref untuk melacak dokumen mana yang sedang di-"force update" agar API tidak kena spam
+  const updatingDocsRef = useRef(new Set());
+
   // --- 1. FETCH DOCUMENTS VIA SERVICE ---
   const fetchDocuments = async () => {
     try {
-      // Fetching 100 items to handle client-side filtering/pagination easily
-      // You can adjust offset/limit if you want server-side pagination later
       const result = await adminService.getDocuments(0, 100);
       
       if (result.data && result.data.document_items) { 
@@ -70,7 +64,44 @@ export default function DokumenAdmin() {
           diuploadOleh: doc.user,
           status: doc.document_status,
         }));
+        
         setDokumen(mappedDocs);
+
+        // --- NEW LOGIC: CHECK STUCK PENDING DOCUMENTS ---
+        const now = Date.now();
+        const TEN_MINUTES_MS = 10 * 60 * 1000;
+
+        mappedDocs.forEach(async (doc) => {
+          // Cek jika status masih pending dan belum sedang di-update oleh fungsi ini
+          if (doc.status === 'pending' && !updatingDocsRef.current.has(doc.id)) {
+            
+            // Lakukan parsing waktu UTC yang sama dengan helper kita
+            let safeDateString = doc.tanggalUpload.replace(" ", "T");
+            if (!safeDateString.endsWith("Z") && !/[+\-]\d{2}:?\d{2}/.test(safeDateString)) {
+              safeDateString += "Z";
+            }
+            const uploadTime = new Date(safeDateString).getTime();
+
+            // Jika valid dan selisihnya lebih dari 10 menit (600.000 ms)
+            if (!isNaN(uploadTime) && (now - uploadTime) > TEN_MINUTES_MS) {
+              
+              // Tambahkan ke Set agar tidak terpanggil lagi di detik ke-5 berikutnya
+              updatingDocsRef.current.add(doc.id);
+              
+              try {
+                console.log(`Document ${doc.id} is stuck. Forcing status update...`);
+                await adminService.changeDocumentStatus(doc.id);
+                // Fungsi setInterval otomatis akan memanggil fetchDocuments lagi setelah ini
+              } catch (error) {
+                console.error(`Gagal mengupdate status untuk dokumen ${doc.id}:`, error);
+                // Hapus dari Set agar bisa dicoba lagi di percobaan berikutnya
+                updatingDocsRef.current.delete(doc.id);
+              }
+            }
+          }
+        });
+        // --- END NEW LOGIC ---
+
       }
     } catch (error) {
       console.error("Error fetching documents:", error);
@@ -132,7 +163,6 @@ export default function DokumenAdmin() {
     setIsLoading(true);
 
     try {
-      // Pass the raw file; the service handles FormData creation
       await adminService.uploadDocument(formData.file);
 
       setFormData({ file: null, nama: "" });
