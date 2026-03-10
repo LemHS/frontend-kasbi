@@ -15,10 +15,24 @@ import {
   AlertCircle 
 } from "lucide-react";
 
-// Helper to format date
+// --- FIX DATE PARSING ---
 const formatDate = (dateString) => {
   if (!dateString) return "-";
-  return new Date(dateString).toLocaleDateString('id-ID', {
+
+  // 1. Ganti spasi dengan "T"
+  let safeDateString = dateString.replace(" ", "T");
+
+  // 2. Tambahkan "Z" jika tidak ada indikator zona waktu
+  if (!safeDateString.endsWith("Z") && !/[+\-]\d{2}:?\d{2}/.test(safeDateString)) {
+    safeDateString += "Z";
+  }
+
+  const dateObj = new Date(safeDateString);
+
+  // 3. Fallback jika tanggal tetap invalid
+  if (isNaN(dateObj.getTime())) return "-";
+
+  return dateObj.toLocaleDateString('id-ID', {
     day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit'
   });
 };
