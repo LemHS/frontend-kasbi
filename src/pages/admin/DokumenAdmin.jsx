@@ -6,6 +6,7 @@ import {
   Upload, 
   FileText, 
   CheckCircle, 
+  XCircle, 
   Search, 
   Trash2,
   Plus,
@@ -253,7 +254,16 @@ export default function DokumenAdmin() {
         <div className="status-cell">
           <Loader size={18} className="animate-spin text-blue-500" style={{marginRight: '8px'}} />
           <span className="status-text" style={{ color: "#3B82F6", fontWeight: 500 }}>
-            Proses AI...
+            Diproses...
+          </span>
+        </div>
+      );
+    } else if (status === 'failed') {
+      return (
+        <div className="status-cell">
+          <XCircle size={18} className="text-red-500" style={{marginRight: '8px', color: '#EF4444'}} />
+          <span className="status-text" style={{ color: "#EF4444", fontWeight: 500 }}>
+            Gagal
           </span>
         </div>
       );
