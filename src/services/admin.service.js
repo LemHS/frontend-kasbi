@@ -33,6 +33,13 @@ export const adminService = {
     return response.data;
   },
 
+  async getDashboard(date) {
+    const response = await api.get("/v1/admin/dashboard", {
+      params: { date },
+    });
+    return response.data;
+  },
+
   // --- USER MANAGEMENT (ADMINS) ---
 
   // GET: Available to standard Admins (admin_router)

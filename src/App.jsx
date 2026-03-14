@@ -6,6 +6,7 @@ import NotFound from "./pages/NotFound";
 import AdminLayout from './layouts/AdminLayout';
 import UserLayout from './layouts/UserLayout';
 import DokumenAdmin from './pages/admin/DokumenAdmin';
+import DashboardAdmin from './pages/admin/DashboardAdmin';
 import UserAdmin from './pages/admin/UserAdmin';
 
 export default function App() {
@@ -30,6 +31,7 @@ export default function App() {
           <Route path="dokumen" element={<DokumenAdmin />} />
           <Route path="chatbot" element={<Chatbot />} />
           <Route path="admin" element={<UserAdmin />} />
+          <Route path="dashboard" element={<DashboardAdmin />} />
         </Route>
         
         {/* 404 Route */}
