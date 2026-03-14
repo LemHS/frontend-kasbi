@@ -56,7 +56,7 @@ export default function DashboardAdmin() {
     
     for (let i = 0; i < 6; i++) {
       labels.push(
-        date.toLocaleDateString('id-ID', { month: 'short', year: 'numeric' }) // Menggunakan 'short' agar label X-Axis tidak tumpang tindih
+        date.toLocaleDateString('id-ID', { month: 'short', year: 'numeric' })
       );
       date.setMonth(date.getMonth() - 1);
     }
@@ -66,11 +66,12 @@ export default function DashboardAdmin() {
   const monthLabels = getMonthLabels();
 
   // Memformat data untuk Recharts
-  // Kita melakukan loop terbalik (dari index 5 ke 0) agar bulan terlama ada di sebelah kiri grafik
+  // Loop terbalik (dari 5 ke 0) agar bulan terlama ada di sebelah kiri grafik
+  // Menggunakan format pemanggilan dictionary: `month_${index}`
   const chartData = data ? [5, 4, 3, 2, 1, 0].map(index => ({
     name: monthLabels[index],
-    Pengguna: data.user_counts?.[index] ?? 0,
-    Chat: data.chat_counts?.[index] ?? 0,
+    Pengguna: data.user_counts?.[`month_${index}`] ?? 0,
+    Chat: data.chat_counts?.[`month_${index}`] ?? 0,
   })) : [];
 
   if (isLoading) {
@@ -111,7 +112,7 @@ export default function DashboardAdmin() {
         </p>
       </header>
 
-      {/* Top Cards - Menampilkan data terbaru (index 0) */}
+      {/* Top Cards - Menampilkan data terbaru (month_0) */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '24px', marginBottom: '32px' }}>
         
         <div style={{ background: 'white', padding: '24px', borderRadius: '12px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)', border: '1px solid #E5E7EB' }}>
@@ -119,7 +120,7 @@ export default function DashboardAdmin() {
             <div>
               <p style={{ color: '#6B7280', fontSize: '14px', fontWeight: 500, margin: 0 }}>Total Pengguna</p>
               <h2 style={{ fontSize: '36px', fontWeight: 700, margin: '8px 0 0 0', color: '#111827' }}>
-                {data.user_counts?.[0] || 0}
+                {data.user_counts?.month_0 || 0} {/* <- Diubah kembali ke month_0 */}
               </h2>
             </div>
             <div style={{ padding: '12px', background: '#DBEAFE', borderRadius: '50%' }}>
@@ -133,7 +134,7 @@ export default function DashboardAdmin() {
             <div>
               <p style={{ color: '#6B7280', fontSize: '14px', fontWeight: 500, margin: 0 }}>Total Interaksi Chat</p>
               <h2 style={{ fontSize: '36px', fontWeight: 700, margin: '8px 0 0 0', color: '#111827' }}>
-                {data.chat_counts?.[0] || 0}
+                {data.chat_counts?.month_0 || 0} {/* <- Diubah kembali ke month_0 */}
               </h2>
             </div>
             <div style={{ padding: '12px', background: '#D1FAE5', borderRadius: '50%' }}>
