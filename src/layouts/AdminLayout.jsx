@@ -75,6 +75,12 @@ export default function AdminLayout() {
       allowedRoles: ["admin", "superadmin"]
     },
     {
+      path: "/admin/dashboard",
+      label: "Dashboard",
+      icon: <FileText size={20} />,
+      allowedRoles: ["admin", "superadmin"]
+    },
+    {
       path: "/admin/admin",
       label: "Kelola Admin",
       icon: <Shield size={20} />,
