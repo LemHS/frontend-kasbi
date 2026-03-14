@@ -9,7 +9,8 @@ import {
   X,
   User,
   ChevronLeft,
-  Shield // Added Shield icon for the Superadmin menu
+  Shield, // Added Shield icon for the Superadmin menu
+  ChartBar
 } from "lucide-react";
 import kasbiLogo from "../assets/images/kasbi-logo.png";
 
@@ -77,7 +78,7 @@ export default function AdminLayout() {
     {
       path: "/admin/dashboard",
       label: "Dashboard",
-      icon: <FileText size={20} />,
+      icon: <ChartBar size={20} />,
       allowedRoles: ["admin", "superadmin"]
     },
     {
