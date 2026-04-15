@@ -382,12 +382,61 @@ export default function Chatbot() {
 
         {/* Input Area */}
         <div className="chat-input-area">
-            
+            <div className="input-wrapper">
+            <textarea
+              ref={textareaRef}
+              value={input}
+              placeholder="Tulis pertanyaan Anda..."
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={handleKeyDown}
+              rows="2"
+              className="chat-input"
+              aria-label="Input pesan untuk chatbot"
+            />
+            <div className="input-hint">
+              Tekan <kbd>Enter</kbd> untuk mengirim • <kbd>Shift + Enter</kbd> untuk baris baru
+            </div>
+          </div>
+          <button
+            onClick={() => sendMessage(input)}
+            className="send-btn"
+            disabled={!input.trim() || loading}
+          >
+            <Send size={20} />
+            <span>Kirim</span>
+          </button>
         </div>
       </main>
 
       {/* Mobile Sidebar Drawer */}
-      {/* Kept unchanged for brevity */}
+      {isMobile && sidebarOpen && !isAdminChatbot && (
+        <div className="mobile-sidebar-drawer">
+          {/* overlay */}
+          <div className="drawer-overlay" onClick={() => setSidebarOpen(false)} />
+          
+          {/* drawer panel */}
+          <aside className="drawer-panel">
+            <div className="drawer-header">
+              <img src={kasbiLogo} className="sidebar-logo" alt="Logo BPMP" />
+              <button className="drawer-close" onClick={() => setSidebarOpen(false)}>
+                <X size={24} />
+              </button>
+            </div>
+            <div className="sidebar-section">
+              <h4 className="sidebar-title">💡 Pertanyaan Cepat</h4>
+              <div className="quick-list">
+                {QUICK_QUESTIONS.map((q, index) => (
+                  <button key={index} className="quick-btn" onClick={() => sendMessage(q.text)}>
+                    <span className="quick-icon">{q.icon}</span>
+                    <span className="quick-text">{q.text}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </aside>
+        </div>
+      )}
+
     </div>
   );
-}
+}   
