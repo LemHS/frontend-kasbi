@@ -382,29 +382,7 @@ export default function Chatbot() {
 
         {/* Input Area */}
         <div className="chat-input-area">
-            <div className="input-wrapper">
-            <textarea
-              ref={textareaRef}
-              value={input}
-              placeholder="Tulis pertanyaan Anda..."
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={handleKeyDown}
-              rows="2"
-              className="chat-input"
-              aria-label="Input pesan untuk chatbot"
-            />
-            <div className="input-hint">
-              Tekan <kbd>Enter</kbd> untuk mengirim • <kbd>Shift + Enter</kbd> untuk baris baru
-            </div>
-          </div>
-          <button
-            onClick={() => sendMessage(input)}
-            className="send-btn"
-            disabled={!input.trim() || loading}
-          >
-            <Send size={20} />
-            <span>Kirim</span>
-          </button>
+            
         </div>
       </main>
 
