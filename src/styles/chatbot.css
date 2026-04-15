@@ -514,6 +514,7 @@
   resize: none;
   transition: all 0.3s ease;
   font-family: inherit;
+  box-sizing: border-box; /* ← add this */
 }
 
 .chat-input:focus {
@@ -548,6 +549,7 @@
   cursor: pointer;
   transition: all 0.3s ease;
   flex-shrink: 0;
+  white-space: nowrap; /* ← add this */
 }
 
 .send-btn:hover:not(:disabled) {
