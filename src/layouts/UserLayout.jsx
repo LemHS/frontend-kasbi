@@ -251,7 +251,7 @@ export default function ChatbotUser() {
             <img src={kasbiLogo} alt="KASBI Logo" className="header-logo" />
             <div className="header-text">
               <h1>KASBI Chatbot</h1>
-              <p>BPMP Papua - Kawan Setia Berbagi Informasi</p>
+              <p className="header-subtitle">BPMP Papua - Kawan Setia Berbagi Informasi</p>
             </div>
           </div>
           

@@ -578,6 +578,16 @@
     box-shadow: 5px 0 20px rgba(0, 0, 0, 0.15);
     transition: left 0.3s ease;
   }
+
+  .header-subtitle {
+    display: none;
+  }
+
+  /* Optional: Adjust header title size for mobile so it looks balanced */
+  .header-text h1 {
+    font-size: 1.2rem;
+    margin: 0;
+  }
   
   .chat-sidebar.open {
     left: 0;
