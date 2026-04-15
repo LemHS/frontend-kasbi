@@ -208,7 +208,7 @@ export default function ChatbotUser() {
       style={{ 
         // If in admin, subtract the header/footer/padding space (180px). 
         // Otherwise, use 100vh for the standalone user view.
-        height: isAdminChatbot ? 'calc(100vh - 140px)' : 'calc(100vh - 120px)',
+        height: isAdminView ? 'calc(100vh - 140px)' : 'calc(100vh - 120px)',
         overflow: 'hidden' 
       }}
     >
