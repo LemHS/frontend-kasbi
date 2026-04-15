@@ -205,6 +205,8 @@ export default function Chatbot() {
     }
   };
 
+  console.log("numba 1");
+
   const containerStyle = {
     display: 'flex',
     // Change 140px to 180px to account for the top bar, footer, and padding
@@ -214,6 +216,8 @@ export default function Chatbot() {
     overflow: 'hidden',
     minHeight: '500px'
   };
+
+  console.log("numba 2");
 
   return (
     <div 
@@ -257,6 +261,8 @@ export default function Chatbot() {
           </div>
         </div>
       )}
+      
+      console.log("numba 3");
 
       {/* Desktop Sidebar */}
       {!isMobile && !isAdminChatbot && (
@@ -311,6 +317,8 @@ export default function Chatbot() {
         </aside>
       )}
 
+      console.log("numba 4");
+
       {/* Main Chat Area */}
       <main className="chat-main">
         <header className="chat-header">
@@ -326,6 +334,8 @@ export default function Chatbot() {
               <p className="header-subtitle">Kawan Setia Berbagi Informasi</p>
             </div>
           </div>
+
+          console.log("numba 5");
           
           {!isMobile && !isAdminChatbot && (
             <div className="header-status">
@@ -373,6 +383,8 @@ export default function Chatbot() {
           <div ref={endRef} className="scroll-anchor" />
         </div>
 
+        console.log("numba 6");
+
         {/* Quick Actions */}
         {!isAdminChatbot && (
           <div className="quick-actions-bar">
@@ -407,6 +419,8 @@ export default function Chatbot() {
           </button>
         </div>
       </main>
+
+      console.log("numba 7");
 
       {/* Mobile Sidebar Drawer */}
       {isMobile && sidebarOpen && !isAdminChatbot && (
