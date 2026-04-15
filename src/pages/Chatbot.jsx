@@ -208,7 +208,7 @@ export default function Chatbot() {
   const containerStyle = {
     display: 'flex',
     // Change 140px to 180px to account for the top bar, footer, and padding
-    height: isAdminChatbot ? 'calc(100vh - 180px)' : 'calc(100vh - 120px)',
+    height: isAdminChatbot ? 'calc(100vh - 140px)' : 'calc(100vh - 120px)',
     background: 'linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%)',
     position: 'relative',
     overflow: 'hidden',
