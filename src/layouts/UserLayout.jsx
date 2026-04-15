@@ -2,15 +2,11 @@ import { useState, useEffect, useRef } from "react";
 import "../styles/user-layout.css";
 import kasbiLogo from "../assets/images/kasbi-logo.png";
 import { Send, MessageSquare, Clock, User, LogOut, ChevronRight, ChevronLeft } from "lucide-react";
-import { useNavigate, useLocation } from "react-router-dom"; // Add useLocation
+import { useNavigate } from "react-router-dom";
 import { chatService } from "../services/chatbot.service"; // Updated import
 
 export default function ChatbotUser() {
   const navigate = useNavigate();
-  const location = useLocation(); // Add this line
-  
-  // Check if this component is being rendered in the admin layout
-  const isAdminView = location.pathname.includes("/admin");
   
   // --- 1. INITIALIZE THREAD ID FROM LOCAL STORAGE ---
   const [threadId, setThreadId] = useState(() => {
@@ -203,15 +199,7 @@ export default function ChatbotUser() {
   };
 
   return (
-    <div 
-      className="chatbot-user-layout"
-      style={{ 
-        // If in admin, subtract the header/footer/padding space (180px). 
-        // Otherwise, use 100vh for the standalone user view.
-        height: isAdminView ? 'calc(100vh - 140px)' : 'calc(100vh - 120px)',
-        overflow: 'hidden' 
-      }}
-    >
+    <div className="chatbot-user-layout">
       {/* SIDEBAR KIRI */}
       <aside className={`chat-sidebar ${sidebarOpen ? 'open' : 'closed'}`}>
         <div className="sidebar-header">
