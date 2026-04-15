@@ -376,7 +376,17 @@ export default function Chatbot() {
         {/* Quick Actions */}
         {!isAdminChatbot && (
           <div className="quick-actions-bar">
-            {/* Kept unchanged for brevity */}
+            {QUICK_ACTIONS.map((action, index) => (
+              <button
+                key={index}
+                className="quick-action-btn"
+                onClick={() => handleQuickAction(action)}
+                style={{ '--action-color': action.color }}
+              >
+                <span className="action-icon">{action.icon}</span>
+                <span className="action-text">{action.text}</span>
+              </button>
+            ))}
           </div>
         )}
 
@@ -409,7 +419,49 @@ export default function Chatbot() {
       </main>
 
       {/* Mobile Sidebar Drawer */}
-      {/* Kept unchanged for brevity */}
+      {isMobile && sidebarOpen && !isAdminChatbot && (
+        <>
+          <div className="mobile-sidebar-drawer">
+            <div className="drawer-header">
+              <img src={kasbiLogo} className="drawer-logo" alt="Logo" />
+              <h3>KASBI Assistant</h3>
+              <button className="drawer-close" onClick={() => setSidebarOpen(false)}>
+                <X size={24} />
+              </button>
+            </div>
+            
+            <div className="drawer-content">
+              <div className="drawer-section">
+                 <h4>👤 Profil Pengguna</h4>
+                 <div className="drawer-user-info">
+                   <div className="user-avatar"><User size={20} /></div>
+                   <div>
+                     <div className="user-name">{userInfo.name}</div>
+                     <div className="user-email">{userInfo.email}</div>
+                   </div>
+                 </div>
+              </div>
+
+              <div className="drawer-section">
+                <h4>💡 Pertanyaan Cepat</h4>
+                <div className="drawer-quick-questions">
+                  {QUICK_QUESTIONS.map((q, index) => (
+                    <button 
+                      key={index} 
+                      className="drawer-quick-btn"
+                      onClick={() => { sendMessage(q.text); setSidebarOpen(false); }}
+                    >
+                      <span className="quick-icon">{q.icon}</span>
+                      <span className="quick-text">{q.text}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="sidebar-overlay" onClick={() => setSidebarOpen(false)} />
+        </>
+      )}
     </div>
   );
 }
