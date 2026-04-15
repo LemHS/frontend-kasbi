@@ -532,7 +532,7 @@
   padding: 2px 10px;
 }
 
-.send-button {
+.send-btn {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -550,12 +550,12 @@
   flex-shrink: 0;
 }
 
-.send-button:hover:not(:disabled) {
+.send-btn:hover:not(:disabled) {
   transform: translateY(-2px);
   box-shadow: 0 6px 20px rgba(200, 16, 46, 0.3);
 }
 
-.send-button:disabled {
+.send-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
@@ -626,12 +626,12 @@
     gap: 10px;
   }
 
-  .send-button {
+  .send-btn {
     padding: 0 20px; /* Smaller button padding */
     height: 54px; /* Slightly shorter button */
   }
   
-  .send-button span {
+  .send-btn span {
     display: none; /* Hide the text "Kirim" to save space, show only icon */
   }
 
