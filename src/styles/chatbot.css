@@ -501,7 +501,7 @@
   max-width: 100%;
 }
 
-.chat-textarea {
+.chat-input {
   width: 100%;
   min-height: 60px;
   max-height: 120px;
@@ -516,7 +516,7 @@
   font-family: inherit;
 }
 
-.chat-textarea:focus {
+.chat-input:focus {
   outline: none;
   border-color: var(--primary-red);
   background: white;
@@ -635,7 +635,7 @@
     display: none; /* Hide the text "Kirim" to save space, show only icon */
   }
 
-  .chat-textarea {
+  .chat-input {
     padding: 12px 15px;
     font-size: 14px;
   }
