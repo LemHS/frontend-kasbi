@@ -392,17 +392,32 @@
 .chat-input-area {
   display: flex;
   gap: 15px;
-  padding: 20px 25px;
+  padding: 20px 30px;
   background: white;
-  border-top: 1px solid #e8e8e8;
-  align-items: flex-end;
-  flex-shrink: 0;
-  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+  border-top: 1px solid #eee;
+  align-items: flex-end; /* Keeps button aligned with bottom of textarea */
+  width: 100%; /* Follows parent width */
+  box-sizing: border-box;
 }
 
 .input-wrapper {
-  flex: 1;
+  flex: 1; /* This makes it take up all available space */
   position: relative;
+  min-width: 0; /* Critical for flex items to prevent overflowing */
+}
+
+/* Ensure the hint text doesn't overlap or hide on mobile */
+.input-hint {
+  position: absolute;
+  bottom: -22px;
+  left: 0;
+  font-size: 11px;
+  color: #888;
+  padding: 2px 10px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
 }
 
 .chat-input {
@@ -427,14 +442,6 @@
   box-shadow: 0 0 0 3px rgba(200, 16, 46, 0.1);
 }
 
-.input-hint {
-  position: absolute;
-  bottom: -22px;
-  left: 0;
-  font-size: 11px;
-  color: #888;
-  padding: 2px 10px;
-}
 
 .input-hint kbd {
   background: #f0f0f0;
@@ -658,9 +665,27 @@
   }
   
   .chat-input-area {
-    padding: 15px;
-    flex-direction: column;
+    padding: 15px; /* Reduce padding on mobile */
     gap: 10px;
+  }
+
+  .send-button {
+    padding: 0 20px; /* Smaller button padding */
+    height: 54px; /* Slightly shorter button */
+  }
+  
+  .send-button span {
+    display: none; /* Hide the text "Kirim" to save space, show only icon */
+  }
+
+  .chat-textarea {
+    padding: 12px 15px;
+    font-size: 14px;
+  }
+
+  /* Hide the hint on very small screens to prevent clutter */
+  .input-hint {
+    display: none;
   }
   
   .send-btn {
