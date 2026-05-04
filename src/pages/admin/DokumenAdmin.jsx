@@ -81,7 +81,7 @@ export default function DokumenAdmin() {
 
         // --- CHECK STUCK PENDING DOCUMENTS ---
         const now = Date.now();
-        const TEN_MINUTES_MS = 10 * 60 * 1000;
+        const TEN_MINUTES_MS = 60 * 60 * 1000;
 
         mappedDocs.forEach(async (doc) => {
           if (doc.status === 'pending' && !updatingDocsRef.current.has(doc.id)) {
